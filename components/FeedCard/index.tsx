@@ -8,6 +8,7 @@ import { PiHeartFill } from "react-icons/pi";
 import { MdOutlineLeaderboard } from "react-icons/md";
 
 
+
 const FeedCard: React.FC = () => {
     return ( 
     <div className="border-t-[0.2px] border-gray-600 p-5 hover:bg-[#181818] cursor-pointer transition-all">

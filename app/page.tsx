@@ -1,4 +1,6 @@
-import React from "react";
+'use client'
+import React, { useCallback } from "react";
+
 import { BsTwitterX } from "react-icons/bs";
 import { GoHome } from "react-icons/go";
 import { RiNotification2Line } from "react-icons/ri";
@@ -8,7 +10,15 @@ import { BsPeople } from "react-icons/bs";
 import { CgProfile } from "react-icons/cg";
 import { RiFileListLine } from "react-icons/ri";
 import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
+
 import FeedCard from "@/components/FeedCard";
+
+import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
+import toast from "react-hot-toast";
+import { graphqlClient } from "@/clients/api";
+import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
+
+
 
 
 interface XSidebarButton{
@@ -52,6 +62,19 @@ const sidebarMenuItems: XSidebarButton[] = [
 ]
 
 export default function Home() {
+  const handleLoginWithGoogle = useCallback(async(cred: CredentialResponse)=>{
+        const googleToken =  cred.credential
+        if(!googleToken){
+          return toast.error(`Google token not found`)
+        }
+        
+        const {verifyGoogleToken} = await graphqlClient.request(verifyUserGoogleTokenQuery , {token : googleToken})
+
+        toast.success('Veified successfully')
+        console.log(verifyGoogleToken)
+
+        if(verifyGoogleToken) window.localStorage.setItem("__token__" , verifyGoogleToken)
+  },[])
   return (
     <div>
       <div className="grid grid-cols-12 h-screen w-screen">
@@ -76,7 +99,12 @@ export default function Home() {
           <FeedCard/>
           <FeedCard/>
         </div>
-        <div className="col-span-4"></div>
+        <div className="col-span-4 p-5">
+          <div className="px-5 py-3 bg-slate-500 rounded-md w-fit">
+            <h1 className="text-center text-xl font-semibold my-2">New to X ?</h1>
+            <GoogleLogin onSuccess={handleLoginWithGoogle}/>
+          </div>
+        </div>
       </div>
     </div>
   );
