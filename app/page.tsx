@@ -1,5 +1,5 @@
 'use client'
-import React, { useCallback } from "react";
+import React, { useCallback, useState } from "react";
 
 import { BsTwitterX } from "react-icons/bs";
 import { GoHome } from "react-icons/go";
@@ -11,6 +11,13 @@ import { CgProfile } from "react-icons/cg";
 import { RiFileListLine } from "react-icons/ri";
 import { HiOutlineDotsCircleHorizontal } from "react-icons/hi";
 
+import { RiGalleryLine } from "react-icons/ri";
+import { MdOutlineGifBox } from "react-icons/md";
+import { BiPoll } from "react-icons/bi";
+import { PiSmiley } from "react-icons/pi";
+
+
+
 import FeedCard from "@/components/FeedCard";
 
 import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
@@ -20,6 +27,8 @@ import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
 import { useCurrentUser } from "@/hooks/user";
 import { useQueryClient } from "@tanstack/react-query";
 import Image from "next/image";
+import { useCreatePost, useGetAllPosts } from "@/hooks/post";
+import { Post } from "@/gql/graphql";
 
 
 
@@ -66,10 +75,28 @@ const sidebarMenuItems: XSidebarButton[] = [
 
 export default function Home() {
 
-  const {user} = useCurrentUser()
+  const {user} = useCurrentUser();
+  const {posts = []} = useGetAllPosts();
+  const {mutate} = useCreatePost();
+
   const queryClient = useQueryClient()
 
-  console.log("user" , user)
+  const [content , setContent] = useState("");
+   
+
+  const handleSelectImage = useCallback(()=>{
+      const input = document.createElement('input')
+      input.setAttribute('type', 'file')
+      input.setAttribute('accept', 'image/*')
+      input.click();
+  },[]);
+
+  const handleCreatePost = useCallback(()=>{
+      mutate({
+        content,
+      })
+      setContent('')
+  },[content,mutate]);
 
   const handleLoginWithGoogle = useCallback(async(cred: CredentialResponse)=>{
         const googleToken =  cred.credential
@@ -123,23 +150,42 @@ export default function Home() {
                 />
               )}
               <div className="flex gap-1">
-                <h3 className="text-base font-medium">{user.firstname}</h3>
-                <h3 className="text-base font-medium">{user.lastname}</h3>
+                <h3 className="text-base font-medium">{user?.firstname}</h3>
+                <h3 className="text-base font-medium">{user?.lastname}</h3>
               </div>
             </div>
           )}
 
         </div>
 
-        <div className="col-span-5 border-x-[0.2px] h-screen overflow-scroll border-x-gray-600">
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
-          <FeedCard />
+        <div className="col-span-5 border-x-[0.2px] h-screen overflow-y-scroll no-scrollbar border-x-gray-600">
+          <div>
+            <div className="border-b-[0.2px] border-gray-600 p-5 hover:bg-[#181818] cursor-pointer transition-all"></div>
+            <div className="grid grid-cols-12 px-4 mt-2">
+              <div className="col-span-1 w-14 h-14">
+                  {user && user.avatar && <Image className="rounded-full w-10 h-10" src={user?.avatar} alt="user image" height={40} width={40} />}
+              </div>
+              <div className="col-span-11 m-2">
+                <div>
+                    <textarea value={content} onChange={e => setContent(e.target.value)} className="w-full bg-transparent text-xl border-b border-slate-600 resize-none focus:outline-none" placeholder="What's happening?!" rows={3}></textarea>
+                </div>
+                <div className="flex items-center justify-between">
+                  <div className="flex gap-4">
+                    <RiGalleryLine onClick={handleSelectImage} className="text-xl text-[#1d9bf0]"/>  
+                    <MdOutlineGifBox className="text-xl text-[#1d9bf0]"/>  
+                    <BiPoll className="text-xl text-[#1d9bf0]"/>  
+                    <PiSmiley className="text-xl text-[#1d9bf0]"/>  
+                  </div>
+                  <div>
+                    <button onClick={handleCreatePost} className="bg-[#1d9bf0] px-4 py-2 rounded-full font-semibold">Post</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          {
+            posts && posts?.map((post)=> post ? <FeedCard key={post?.id} data={post as Post}/> : null)
+          }
         </div>
 
         <div className="col-span-4 p-5">
