@@ -5,7 +5,15 @@ import "./globals.css";
 
 const inter = Inter({ subsets: ["latin"] });
 
-import toast, { Toaster } from 'react-hot-toast';
+import { Toaster } from 'react-hot-toast';
+
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
+// import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
+
+import { Providers } from "@/QueryClientProvider";
+
+// const queryClient = new QueryClient()
 
 export const metadata: Metadata = {
   title: "X",
@@ -19,10 +27,13 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <GoogleOAuthProvider clientId="677107428141-nemjv35hj2kla7sb1dp0sokasl844nq8.apps.googleusercontent.com">
-        <body className={inter.className}>{children}</body>
-        <Toaster/>
-      </GoogleOAuthProvider>
+      <Providers>
+        <GoogleOAuthProvider clientId="677107428141-nemjv35hj2kla7sb1dp0sokasl844nq8.apps.googleusercontent.com">
+          <body className={inter.className}>{children}</body>
+          <Toaster/>
+          <ReactQueryDevtools />
+        </GoogleOAuthProvider>
+      </Providers>
     </html>
   );
 }

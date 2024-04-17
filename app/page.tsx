@@ -17,6 +17,9 @@ import { CredentialResponse, GoogleLogin } from '@react-oauth/google';
 import toast from "react-hot-toast";
 import { graphqlClient } from "@/clients/api";
 import { verifyUserGoogleTokenQuery } from "@/graphql/query/user";
+import { useCurrentUser } from "@/hooks/user";
+import { useQueryClient } from "@tanstack/react-query";
+import Image from "next/image";
 
 
 
@@ -62,6 +65,12 @@ const sidebarMenuItems: XSidebarButton[] = [
 ]
 
 export default function Home() {
+
+  const {user} = useCurrentUser()
+  const queryClient = useQueryClient()
+
+  console.log("user" , user)
+
   const handleLoginWithGoogle = useCallback(async(cred: CredentialResponse)=>{
         const googleToken =  cred.credential
         if(!googleToken){
@@ -74,36 +83,74 @@ export default function Home() {
         console.log(verifyGoogleToken)
 
         if(verifyGoogleToken) window.localStorage.setItem("__token__" , verifyGoogleToken)
-  },[])
+
+        await queryClient.invalidateQueries({queryKey: ["curent-user"]});
+
+  },[queryClient])
   return (
     <div>
       <div className="grid grid-cols-12 h-screen w-screen">
-        <div className="col-span-3 pl-16 pt-3">
+        <div className="col-span-3 pl-16 pt-3 relative">
           <div className="h-fit px-4 cursor-pointer">
-            <BsTwitterX className="text-3xl"/>
+            <BsTwitterX className="text-3xl" />
           </div>
           <div className="mt-8">
             <ul>
-              {sidebarMenuItems.map(item => <li className="flex justify-start items-center gap-2 my-3 cursor-pointer w-fit hover:bg-[#181818] rounded-full px-4 py-2" key={item.title} ><span className="text-3xl">{item.icon}</span><span className="text-xl">{item.title}</span></li> )}
+              {sidebarMenuItems.map((item) => (
+                <li
+                  className="flex justify-start items-center gap-2 my-3 cursor-pointer w-fit hover:bg-[#181818] rounded-full px-4 py-2"
+                  key={item.title}
+                >
+                  <span className="text-3xl">{item.icon}</span>
+                  <span className="text-xl">{item.title}</span>
+                </li>
+              ))}
             </ul>
-            <button className="bg-[#1d9bf0] w-2/3 py-3 rounded-full font-semibold">Post</button>
+            <button className="bg-[#1d9bf0] w-2/3 py-3 rounded-full font-semibold">
+              Post
+            </button>
           </div>
+
+          {user && (
+            <div className=" absolute bottom-5 flex items-center gap-2 px-3 py-2 rounded-full hover:bg-[#181818]">
+              {user && user?.avatar && (
+                <Image
+                  src={user?.avatar}
+                  alt="avatar"
+                  className="rounded-full"
+                  height={40}
+                  width={40}
+                />
+              )}
+              <div className="flex gap-1">
+                <h3 className="text-base font-medium">{user.firstname}</h3>
+                <h3 className="text-base font-medium">{user.lastname}</h3>
+              </div>
+            </div>
+          )}
+
         </div>
+
         <div className="col-span-5 border-x-[0.2px] h-screen overflow-scroll border-x-gray-600">
-          <FeedCard/>
-          <FeedCard/>
-          <FeedCard/>
-          <FeedCard/>
-          <FeedCard/>
-          <FeedCard/>
-          <FeedCard/>
-          <FeedCard/>
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
+          <FeedCard />
         </div>
+
         <div className="col-span-4 p-5">
-          <div className="px-5 py-3 bg-slate-500 rounded-md w-fit">
-            <h1 className="text-center text-xl font-semibold my-2">New to X ?</h1>
-            <GoogleLogin onSuccess={handleLoginWithGoogle}/>
-          </div>
+          {!user && (
+            <div className="px-5 py-3 bg-slate-500 rounded-md w-fit">
+              <h1 className="text-center text-xl font-semibold my-2">
+                New to X ?
+              </h1>
+              <GoogleLogin onSuccess={handleLoginWithGoogle} />
+            </div>
+          )}
         </div>
       </div>
     </div>
