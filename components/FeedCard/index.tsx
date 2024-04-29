@@ -4,9 +4,9 @@ import Image from "next/image";
 import { FaRegComment , FaBookmark , FaRegBookmark} from "react-icons/fa";
 import { FaRetweet } from "react-icons/fa6";
 import { PiHeartBold } from "react-icons/pi";
-import { PiHeartFill } from "react-icons/pi";
 import { MdOutlineLeaderboard } from "react-icons/md";
 import { Post } from "@/gql/graphql";
+import Link from "next/link";
 
 
 interface FeedCardProps {
@@ -15,19 +15,20 @@ interface FeedCardProps {
 
 const FeedCard: React.FC<FeedCardProps> = (props) => {
     const {data} = props;
-
-
+    
     return ( 
     <div className="border-t-[0.2px] border-gray-600 px-4 py-3 cursor-pointer ">
         <div className="grid grid-cols-12">
             <div className="col-span-1 w-14 h-14">
-                {data?.owner?.avatar && <Image className="rounded-full w-10 h-10" src={data?.owner.avatar} alt="user image" height={40} width={40} />}
+            <Link href={`/${data?.owner.id}`}> {data?.owner?.avatar && <Image className="rounded-full w-10 h-10" src={data?.owner?.avatar} alt="user image" height={40} width={40} />}  </Link> 
             </div>
             <div className="col-span-11">
+            <Link href={`/${data?.owner.id}`}>   
                 <div className="flex gap-1">
-                    <h5 className="text-[15px] font-semibold">{data?.owner.firstname}</h5>
-                    <h5 className="text-[15px] font-semibold">{data?.owner.lastname}</h5>
+                    <h5 className="text-[15px] font-semibold">{data?.owner?.firstname}</h5>
+                    <h5 className="text-[15px] font-semibold">{data?.owner?.lastname}</h5>
                 </div>
+            </Link>     
 
                 <p className="text-[15px]">{data?.content}</p>
 

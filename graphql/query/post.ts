@@ -9,6 +9,7 @@ export const getAllPostQuery = graphql(`
       content
       imageUrl
       owner {
+        id
         firstname
         lastname
         avatar
